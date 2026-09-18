@@ -1,0 +1,11 @@
+diff --git a/runtimes/msvc/BUILD.bazel b/runtimes/msvc/BUILD.bazel
+--- a/runtimes/msvc/BUILD.bazel
++++ b/runtimes/msvc/BUILD.bazel
+@@ -45,6 +45,7 @@
+     "ehdata_forceinclude.h",
+     "ehdata_values.h",
+     "excpt.h",
++    "limits.h",
+     "sal.h",
+     "setjmp.h",
+     "setjmpex.h",

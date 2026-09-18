@@ -1,9 +1,37 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("@llvm//:case_insensitive_vfs.bzl", "case_insensitive_vfs_overlay")
 load("@bazel_skylib//rules/directory:directory.bzl", "directory")
-cc_library(name = "limits", srcs = ["limits.c"])
-cc_binary(name = "legacy_stdio", srcs = ["legacy.c"])
-cc_library(name = "stdio_mode", srcs = ["stdio.c"])
-cc_binary(name = "crt_static_local", srcs = ["crt.c"], features = ["-dynamic_link_msvcrt", "static_link_msvcrt"])
-directory(name = "headers", srcs = ["sdk/Nested/Probe.H"])
-case_insensitive_vfs_overlay(name = "overlay", roots = [":headers"])
+load("@llvm//:case_insensitive_vfs.bzl", "case_insensitive_vfs_overlay")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+cc_library(
+    name = "limits",
+    srcs = ["limits.c"],
+)
+
+cc_binary(
+    name = "legacy_stdio",
+    srcs = ["legacy.c"],
+)
+
+cc_library(
+    name = "stdio_mode",
+    srcs = ["stdio.c"],
+)
+
+cc_binary(
+    name = "crt_static_local",
+    srcs = ["crt.c"],
+    features = [
+        "-dynamic_link_msvcrt",
+        "static_link_msvcrt",
+    ],
+)
+
+directory(
+    name = "headers",
+    srcs = ["sdk/Nested/Probe.H"],
+)
+
+case_insensitive_vfs_overlay(
+    name = "overlay",
+    roots = [":headers"],
+)

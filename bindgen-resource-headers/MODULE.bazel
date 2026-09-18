@@ -1,17 +1,30 @@
 module(name = "llvm_repro")
+
 bazel_dep(name = "llvm", version = "0.8.21")
 bazel_dep(name = "rules_cc", version = "0.2.25")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "bazel_lib", version = "3.2.2")
+
 register_toolchains("@llvm//toolchain:all")
 
 bazel_dep(name = "rules_rs", version = "0.0.102")
+
 rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")
 use_repo(rules_rust, "rules_rust")
+
 rust = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
-rust.toolchain(edition = "2021", version = "1.92.0")
+rust.toolchain(
+    edition = "2021",
+    version = "1.92.0",
+)
 use_repo(rust, "default_rust_toolchains")
+
 register_toolchains("@default_rust_toolchains//:all")
+
 bindgen = use_extension("@rules_rs//rs:rules_rust_bindgen.bzl", "rules_rust_bindgen", dev_dependency = True)
 use_repo(bindgen, "rules_rust_bindgen")
-register_toolchains("@rules_rust_bindgen//:all", dev_dependency = True)
+
+register_toolchains(
+    "@rules_rust_bindgen//:all",
+    dev_dependency = True,
+)

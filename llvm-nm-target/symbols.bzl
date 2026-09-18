@@ -8,6 +8,7 @@ def _symbols_impl(ctx):
         outputs = [output],
     )
     return [DefaultInfo(files = depset([output]))]
+
 symbols = rule(implementation = _symbols_impl, attrs = {
     "object": attr.label(mandatory = True),
     "nm": attr.label(mandatory = True, executable = True, allow_single_file = True, cfg = "exec"),

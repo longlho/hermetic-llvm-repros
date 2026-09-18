@@ -28,8 +28,8 @@ python3 run.py msvc-integration --case limits --variant patched --accept-msvc-eu
 For the native Windows cycle, run in PowerShell on Windows x64, with Git Bash installed:
 
 ```powershell
-./run-windows.ps1 -Variant upstream -AcceptMsvcEula -AnalyzeOnly
-./run-windows.ps1 -Variant patched -AcceptMsvcEula -AnalyzeOnly
+./run-windows.ps1 -Variant upstream -AcceptMsvcEula -AnalyzeOnly -MsvcHost
+./run-windows.ps1 -Variant patched -AcceptMsvcEula -AnalyzeOnly -MsvcHost
 ```
 
 Remove `-AnalyzeOnly` to compile. `-Bazel` selects Bazel; optional `-OutputUserRoot C:/b` gives Windows a short output path. Analysis results are not runtime proof.

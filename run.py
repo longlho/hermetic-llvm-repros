@@ -58,6 +58,9 @@ def main():
     shutil.copytree(ROOT / args.folder, work, dirs_exist_ok=True, ignore=shutil.ignore_patterns('README.md', '*.patch', 'MODULE.bazel.lock', 'bazel-*'))
     if args.variant == 'patched':
         patches = sorted((ROOT / args.folder).glob('*.patch'))
+        if args.folder == 'msvc-integration':
+            names = {'limits': 'limits.patch', 'legacy-stdio': 'legacy-stdio.patch', 'stdio-mode': 'stdio-mode.patch', 'crt-local': 'crt-mode-745.patch', 'crt-static': 'crt-mode-745.patch'}
+            patches = [ROOT / args.folder / names[args.case]] if args.case in names else []
         if not patches:
             parser.error('No justified candidate patch for this folder; see README.md')
         for patch in patches:

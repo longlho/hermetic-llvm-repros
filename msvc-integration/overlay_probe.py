@@ -36,8 +36,8 @@ def main():
         control = invoke(flags, root)
         nested = invoke(flags, root / 'consumer/nested')
         # Positive control only: re-anchor the same public generator output, not an upstream patch.
-        data['root-relative'] = 'overlay-dir'
-        data['overlay-relative'] = True
+        # LLVM parses roots as it encounters them: options must precede roots.
+        data = {'version': 0, 'case-sensitive': False, 'root-relative': 'overlay-dir', 'overlay-relative': True, 'roots': data['roots']}
         def relocate(node, top=False):
             if top:
                 node['name'] = '../' + node['name']
@@ -53,7 +53,7 @@ def main():
         fixed = invoke([clang, '-fsyntax-only', '-ivfsoverlay', str(relocated / 'overlays/native.json'), '-I', str(relocated / 'sdk'), str(relocated / 'probe.c')], relocated / 'consumer/nested')
         print(json.dumps({'original_cwd': control.returncode, 'nested_cwd': nested.returncode, 'relocated_overlay_control': fixed.returncode}))
         if control.returncode != 0 or nested.returncode == 0 or fixed.returncode != 0:
-            print(control.stderr + nested.stderr + fixed.stderr, file=sys.stderr)
+            print(control.stdout + control.stderr + nested.stdout + nested.stderr + fixed.stdout + fixed.stderr, file=sys.stderr)
             return 1
     return 0
 

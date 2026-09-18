@@ -1,4 +1,14 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_rs//rs:rules_rust_bindgen.bzl", "rust_bindgen")
-cc_library(name = "header", hdrs = ["probe.h"])
-rust_bindgen(name = "probe", header = "probe.h", cc_lib = ":header", bindgen_flags = ["--allowlist-type=SizeProbe"])
+
+cc_library(
+    name = "header",
+    hdrs = ["probe.h"],
+)
+
+rust_bindgen(
+    name = "probe",
+    bindgen_flags = ["--allowlist-type=SizeProbe"],
+    cc_lib = ":header",
+    header = "probe.h",
+)
