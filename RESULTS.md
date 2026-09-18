@@ -18,7 +18,6 @@ Validated 2026-09-18 with Bazel 9.2.0 and official hermetic-llvm 0.8.21. User/sy
 | VFS cwd/relocation | Original cwd passes; nested cwd cannot find virtual header | Overlay-relative positive control passes after moving fixture | Independent cwd-sensitive overlay reproduction; control is not a production generator patch. |
 | Native Windows, default host platform | Analysis and build pass | Not needed | Negative control; target ABI alone does not trigger the cycle. |
 | Native Windows, explicit MSVC host | Analysis fails with SDK-overlay generator dependency cycle | Stage-0 + hosted-stage-1 exclusion passes analysis and compilation | Independent native-host bootstrap cycle. |
-| Public `@llvm//tools:llvm-nm` | Extracts synthetic exported symbol | Not needed | Patch retired; public-tool regression control retained. |
 
 ## Windows candidate boundary
 
@@ -31,7 +30,6 @@ Patched explicit-MSVC-host compilation succeeds: 393 actions, producing `hello.e
 - Bootstrap cycle, missing `limits.h`, missing compatibility library: independent minimal failures with candidate fixes.
 - VFS paths: independent failure and relocated positive control; production generator/interface changes remain to be designed and tested.
 - Bindgen and CRT selection: attach evidence to existing #755 / #745 work rather than duplicate it.
-- Custom llvm-nm alias: patch retired; existing public tool regression control retained.
 - Go builtins linking and helper visibility: no upstream necessity established by these repros.
 - C stdio policy: requires a real interoperability/runtime example before presenting it as an upstream bug.
 

@@ -30,9 +30,6 @@ CASES = {
         'hello': ['build', '//:hello'],
         'generator': ['build', '@llvm//tools/case_insensitive_vfs:case_insensitive_vfs'],
     },
-    'llvm-nm-target': {
-        'public': ['build', '//:public_tool'],
-    },
 }
 
 def main():

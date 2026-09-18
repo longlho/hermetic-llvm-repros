@@ -1,6 +1,6 @@
 # hermetic-llvm standalone repros
 
-Small public-source experiments against the official **hermetic-llvm 0.8.21** release, using Bazel 9.2.0. Five folders track investigated patch topics, including retired patches retained as regression controls. A policy assertion is not proof of an upstream defect.
+Small public-source experiments against the official **hermetic-llvm 0.8.21** release, using Bazel 9.2.0. Four folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
 
 | Folder | Question |
 | --- | --- |
@@ -8,14 +8,12 @@ Small public-source experiments against the official **hermetic-llvm 0.8.21** re
 | `macos-go-link` | Do Go platform/exec transitions lose a compiler-rt archive path? Are public directory providers sufficient? |
 | `msvc-integration` | Which CRT, header, library, and VFS assumptions fail independently? |
 | `windows-bootstrap` | Does native Windows compilation depend on its own SDK overlay generator? |
-| `llvm-nm-target` | **Retired patch:** passing regression control for the existing public tool. |
 
 ## Run
 
 Install Bazel 9.2.0 (or Bazelisk), Python 3.10+, and Git. Run from this repository:
 
 ```sh
-python3 run.py llvm-nm-target --case public --host-sdk
 python3 run.py macos-go-link --case exec-transition --host-sdk
 python3 run.py bindgen-resource-headers --case bindgen-linux --host-sdk
 python3 run.py bindgen-resource-headers --case bindgen-linux --variant patched --host-sdk
