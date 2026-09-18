@@ -24,7 +24,7 @@ Validated 2026-09-18 with Bazel 9.2.0 and official hermetic-llvm 0.8.21. User/sy
 
 Excluding overlays only for hosted stage 1 leaves a second cycle through stage-0 compiler-rt. The isolated candidate excludes both stages. Default-host success must not be reported as proof for explicit MSVC-host execution.
 
-Patched explicit-MSVC-host compilation succeeds: 393 actions, producing `hello.exe` on Windows x64.
+Patched explicit-MSVC-host compilation succeeds: 393 actions, producing `hello.exe` on Windows x64. Running that executable exits 0.
 
 ## What is ready for upstream discussion
 

@@ -1,1 +1,0 @@
-#define PROBE_VALUE 42

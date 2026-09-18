@@ -1,5 +1,3 @@
-load("@bazel_skylib//rules/directory:directory.bzl", "directory")
-load("@llvm//:case_insensitive_vfs.bzl", "case_insensitive_vfs_overlay")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 cc_library(
@@ -24,14 +22,4 @@ cc_binary(
         "-dynamic_link_msvcrt",
         "static_link_msvcrt",
     ],
-)
-
-directory(
-    name = "headers",
-    srcs = ["sdk/Nested/Probe.H"],
-)
-
-case_insensitive_vfs_overlay(
-    name = "overlay",
-    roots = [":headers"],
 )
