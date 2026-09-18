@@ -1,0 +1,58 @@
+--- a/toolchain/args/windows/msvc/BUILD.bazel
++++ b/toolchain/args/windows/msvc/BUILD.bazel
+@@ -199,19 +199,15 @@
+     ],
+     args = [
+         "/clang:-Xlinker",
+-        "/clang:/vfsoverlay:{sdk_library_case_overlay}",
+-        "/clang:-Xlinker",
+         "/clang:/LIBPATH:{winsdk_ucrt_lib}",
+         "/clang:-Xlinker",
+         "/clang:/LIBPATH:{winsdk_um_lib}",
+     ],
+     data = [
+-        "//runtimes/msvc:msvc_sdk_library_case_overlay",
+         "//runtimes/msvc:winsdk_ucrt_lib",
+         "//runtimes/msvc:winsdk_um_lib",
+     ],
+     format = {
+-        "sdk_library_case_overlay": "//runtimes/msvc:msvc_sdk_library_case_overlay",
+         "winsdk_ucrt_lib": "//runtimes/msvc:winsdk_ucrt_lib",
+         "winsdk_um_lib": "//runtimes/msvc:winsdk_um_lib",
+     },
+@@ -221,9 +217,11 @@
+     name = "normalized_sdk_compile_args",
+     args = [
+         "windows_sdk_compile_defines",
+-        "sdk_header_case_overlay",
+         "sdk_includes",
+-    ],
++    ] + select({
++        "//toolchain:runtimes_stage1_hosted": [],
++        "//conditions:default": ["sdk_header_case_overlay"],
++    }),
+     visibility = ["//visibility:public"],
+ )
+ 
+@@ -233,6 +231,9 @@
+         "sdk_library_search_paths",
+         "com_support_library_search_paths",
+     ] + select({
++        "//toolchain:runtimes_stage1_hosted": [],
++        "//conditions:default": ["library_overlay"],
++    }) + select({
+         "//toolchain/features/msvc:static_crt_config": ["static_crt_library_search_paths"],
+         "//conditions:default": ["dynamic_crt_library_search_paths"],
+     }) + select({
+@@ -252,3 +253,11 @@
+     }),
+     visibility = ["//visibility:public"],
+ )
++
++cc_args(
++    name = "library_overlay",
++    actions = ["@rules_cc//cc/toolchains/actions:link_actions"],
++    args = ["/clang:-Xlinker", "/clang:/vfsoverlay:{vfs}"],
++    data = ["//runtimes/msvc:msvc_sdk_library_case_overlay"],
++    format = {"vfs": "//runtimes/msvc:msvc_sdk_library_case_overlay"},
++)

@@ -1,0 +1,9 @@
+load("@rules_go//go:def.bzl", "go_binary")
+load("@bazel_skylib//rules/directory:glob.bzl", "directory_glob")
+load(":transition.bzl", "transitioned_go_binary")
+go_binary(name = "plain", srcs = ["hello.go"], cgo = True)
+transitioned_go_binary(name = "transitioned", srcs = ["hello.go"], cgo = True)
+directory_glob(name = "public_headers", directory = "//sdk:headers", srcs = ["**"])
+directory_glob(name = "internal_headers", directory = "//sdk:headers_directory", srcs = ["**"])
+
+genrule(name = "exec_transition", outs = ["exec_result.txt"], tools = [":transitioned"], cmd = "$(execpath :transitioned) && echo ok > $@")

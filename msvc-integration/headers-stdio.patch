@@ -1,0 +1,55 @@
+--- a/runtimes/msvc/BUILD.bazel
++++ b/runtimes/msvc/BUILD.bazel
+@@ -6,6 +6,7 @@
+ 
+ _MSVC_DYNAMIC_RUNTIME_LIBRARIES = [
+     "iso_stdio_wide_specifiers.lib",
++    "legacy_stdio_definitions.lib",
+     "msvcprt.lib",
+     "msvcrt.lib",
+     "oldnames.lib",
+@@ -14,6 +15,7 @@
+ 
+ _MSVC_STATIC_RUNTIME_LIBRARIES = [
+     "iso_stdio_wide_specifiers.lib",
++    "legacy_stdio_definitions.lib",
+     "libcmt.lib",
+     "libcpmt.lib",
+     "libvcruntime.lib",
+@@ -45,6 +47,7 @@
+     "ehdata_forceinclude.h",
+     "ehdata_values.h",
+     "excpt.h",
++    "limits.h",
+     "sal.h",
+     "setjmp.h",
+     "setjmpex.h",
+--- a/toolchain/args/windows/msvc/BUILD.bazel
++++ b/toolchain/args/windows/msvc/BUILD.bazel
+@@ -40,13 +40,12 @@
+ )
+ 
+ cc_args(
+-    name = "msvc_crt_compile_defines",
++    name = "common_crt_compile_defines",
+     actions = _FRONTEND_ACTIONS,
+     args = [
+         "/D_CRT_NONSTDC_NO_WARNINGS",
+         "/D_CRT_SECURE_NO_DEPRECATE",
+         "/D_CRT_SECURE_NO_WARNINGS",
+-        "/D_CRT_STDIO_ISO_WIDE_SPECIFIERS",
+     ],
+ )
+ 
+@@ -252,3 +251,11 @@
+     }),
+     visibility = ["//visibility:public"],
+ )
++
++cc_args(
++    name = "cpp_iso_stdio",
++    actions = ["@rules_cc//cc/toolchains/actions:cpp_compile", "@rules_cc//cc/toolchains/actions:cpp_header_parsing", "@rules_cc//cc/toolchains/actions:linkstamp_compile"],
++    args = ["/D_CRT_STDIO_ISO_WIDE_SPECIFIERS"],
++)
++
++cc_args_list(name = "msvc_crt_compile_defines", args = [":common_crt_compile_defines", ":cpp_iso_stdio"])
