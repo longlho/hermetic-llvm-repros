@@ -11,9 +11,3 @@ symbols(
     nm = "@llvm//tools:llvm-nm",
     object = ":object",
 )
-
-symbols(
-    name = "custom_alias",
-    nm = "@llvm//toolchain:llvm_nm",
-    object = ":object",
-)

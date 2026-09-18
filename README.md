@@ -1,6 +1,6 @@
 # hermetic-llvm standalone repros
 
-Small public-source experiments against the official **hermetic-llvm 0.8.21** release, using Bazel 9.2.0. Five folders correspond to five patch topics. A failing custom-label lookup or a policy assertion is not proof of an upstream defect.
+Small public-source experiments against the official **hermetic-llvm 0.8.21** release, using Bazel 9.2.0. Five folders track investigated patch topics, including retired patches retained as regression controls. A policy assertion is not proof of an upstream defect.
 
 | Folder | Question |
 | --- | --- |
@@ -8,7 +8,7 @@ Small public-source experiments against the official **hermetic-llvm 0.8.21** re
 | `macos-go-link` | Do Go platform/exec transitions lose a compiler-rt archive path? Are public directory providers sufficient? |
 | `msvc-integration` | Which CRT, header, library, and VFS assumptions fail independently? |
 | `windows-bootstrap` | Does native Windows compilation depend on its own SDK overlay generator? |
-| `llvm-nm-target` | Is a custom executable alias necessary when a public tool already exists? |
+| `llvm-nm-target` | **Retired patch:** passing regression control for the existing public tool. |
 
 ## Run
 

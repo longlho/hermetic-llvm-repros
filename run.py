@@ -32,7 +32,6 @@ CASES = {
     },
     'llvm-nm-target': {
         'public': ['build', '//:public_tool'],
-        'custom': ['build', '//:custom_alias'],
     },
 }
 
