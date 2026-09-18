@@ -23,6 +23,7 @@ $logs = Join-Path $PSScriptRoot "results/windows-bootstrap/$Variant"
 New-Item -ItemType Directory -Force $logs | Out-Null
 Push-Location $work
 try {
+    $ErrorActionPreference = 'Continue'
     & $Bazel @startup @arguments 2>&1 | Out-File (Join-Path $logs 'hello.log')
     $result = $LASTEXITCODE
 } finally { Pop-Location }

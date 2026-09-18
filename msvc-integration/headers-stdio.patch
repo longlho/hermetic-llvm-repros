@@ -1,3 +1,4 @@
+diff --git a/runtimes/msvc/BUILD.bazel b/runtimes/msvc/BUILD.bazel
 --- a/runtimes/msvc/BUILD.bazel
 +++ b/runtimes/msvc/BUILD.bazel
 @@ -6,6 +6,7 @@
@@ -24,6 +25,7 @@
      "sal.h",
      "setjmp.h",
      "setjmpex.h",
+diff --git a/toolchain/args/windows/msvc/BUILD.bazel b/toolchain/args/windows/msvc/BUILD.bazel
 --- a/toolchain/args/windows/msvc/BUILD.bazel
 +++ b/toolchain/args/windows/msvc/BUILD.bazel
 @@ -40,13 +40,12 @@

@@ -1,3 +1,4 @@
+diff --git a/toolchain/args/windows/msvc/BUILD.bazel b/toolchain/args/windows/msvc/BUILD.bazel
 --- a/toolchain/args/windows/msvc/BUILD.bazel
 +++ b/toolchain/args/windows/msvc/BUILD.bazel
 @@ -199,19 +199,15 @@
