@@ -68,6 +68,8 @@ def main():
     command += ['--color=no', '--curses=no']
     if windows:
         command += ['--platforms=@llvm//platforms:windows_x86_64_msvc', '--repo_env=BAZEL_MSVC_RUNTIME_VISUAL_STUDIO_EULA=1', '--repo_env=BAZEL_WINDOWS_SDK_EULA=1']
+    if args.folder == 'windows-bootstrap':
+        command += ['--host_platform=@llvm//platforms:windows_x86_64_msvc']
     if args.host_sdk:
         command += ['--repo_env=BAZEL_MACOS_USE_HOST_SDK=1']
     if args.analyze_only:
@@ -83,12 +85,11 @@ def main():
             query = subprocess.check_output([args.bazel, '--batch', '--nosystem_rc', '--nohome_rc', 'cquery', label, '--output=files'] + (['--repo_env=BAZEL_MACOS_USE_HOST_SDK=1'] if args.host_sdk else []), cwd=work, text=True)
             relative = query.strip().splitlines()[-1]
             if relative.startswith('external/'):
-                path = work / 'bazel-out/../../../' / relative
                 execroot = subprocess.check_output([args.bazel, '--batch', '--nosystem_rc', '--nohome_rc', 'info', 'execution_root'], cwd=work, text=True).strip()
                 path = Path(execroot) / relative
             else:
                 path = work / relative
-            tool_paths.append(str(path.resolve()))
+            tool_paths.append(str(path.absolute()))
         with logfile.open('a') as log:
             result = subprocess.run([sys.executable, str(ROOT / 'msvc-integration/overlay_probe.py')] + tool_paths, cwd=work, stdout=log, stderr=subprocess.STDOUT)
     print(f'{args.folder}/{args.case} [{args.variant}]: exit {result.returncode}')

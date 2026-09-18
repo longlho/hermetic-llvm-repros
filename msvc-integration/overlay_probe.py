@@ -12,9 +12,9 @@ def invoke(command, cwd):
 
 
 def main():
-    generator, clang = [str(Path(p).resolve()) for p in sys.argv[1:]]
+    generator, clang = [str(Path(p).absolute()) for p in sys.argv[1:]]
     with tempfile.TemporaryDirectory(prefix='llvm-vfs-repro-') as temp:
-        root = Path(temp) / 'fixture with spaces'
+        root = Path(temp).resolve() / 'fixture with spaces'
         (root / 'sdk').mkdir(parents=True)
         (root / 'overlays').mkdir()
         (root / 'consumer/nested').mkdir(parents=True)

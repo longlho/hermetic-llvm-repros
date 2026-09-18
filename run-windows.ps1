@@ -3,11 +3,13 @@ param(
     [string]$Bazel = 'bazel',
     [string]$OutputUserRoot = '',
     [switch]$AcceptMsvcEula,
+    [switch]$MsvcHost,
     [switch]$AnalyzeOnly
 )
 $ErrorActionPreference = 'Stop'
 if (-not $AcceptMsvcEula) { throw 'Review Microsoft runtime/SDK licenses, then pass -AcceptMsvcEula.' }
-$work = Join-Path $PSScriptRoot ".work/windows-bootstrap/$Variant"
+$case = if ($MsvcHost) { "msvc-host" } else { "default-host" }
+$work = Join-Path $PSScriptRoot ".work/windows-bootstrap/$Variant-$case"
 New-Item -ItemType Directory -Force $work | Out-Null
 Copy-Item "$PSScriptRoot/windows-bootstrap/*" $work -Recurse -Force
 Copy-Item "$PSScriptRoot/windows-bootstrap/.bazelrc" $work -Force
@@ -18,8 +20,9 @@ if ($Variant -eq 'patched') {
 $startup = @('--batch', '--nosystem_rc', '--nohome_rc')
 if ($OutputUserRoot) { $startup += "--output_user_root=$OutputUserRoot" }
 $arguments = @('build', '//:hello', '--platforms=@llvm//platforms:windows_x86_64_msvc', '--repo_env=BAZEL_MSVC_RUNTIME_VISUAL_STUDIO_EULA=1', '--repo_env=BAZEL_WINDOWS_SDK_EULA=1', '--color=no', '--curses=no')
+if ($MsvcHost) { $arguments += '--host_platform=@llvm//platforms:windows_x86_64_msvc' }
 if ($AnalyzeOnly) { $arguments += '--nobuild' }
-$logs = Join-Path $PSScriptRoot "results/windows-bootstrap/$Variant"
+$logs = Join-Path $PSScriptRoot "results/windows-bootstrap/$Variant-$case"
 New-Item -ItemType Directory -Force $logs | Out-Null
 Push-Location $work
 try {
