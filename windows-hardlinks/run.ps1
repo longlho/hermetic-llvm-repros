@@ -18,9 +18,9 @@ foreach ($variant in @('upstream', 'patched')) {
     }
     Push-Location $workspace
     try {
-        bazel --batch --nosystem_rc --nohome_rc fetch '--repo=@llvm-toolchain-minimal-windows-amd64'
+        bazel --batch --windows_enable_symlinks --nosystem_rc --nohome_rc fetch '--repo=@llvm-toolchain-minimal-windows-amd64'
         if ($LASTEXITCODE) { throw "Bazel fetch failed: $variant" }
-        $outputBase = (bazel --batch --nosystem_rc --nohome_rc info output_base | Select-Object -Last 1).Trim()
+        $outputBase = (bazel --batch --windows_enable_symlinks --nosystem_rc --nohome_rc info output_base | Select-Object -Last 1).Trim()
         if ($LASTEXITCODE) { throw 'Cannot find Bazel output base' }
         $repos = @(Get-ChildItem "$outputBase/external" -Directory | Where-Object { $_.Name.EndsWith('+llvm-toolchain-minimal-windows-amd64') })
         if ($repos.Count -ne 1) { throw "Expected one archive repository, got $($repos.Count)" }

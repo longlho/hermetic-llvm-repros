@@ -9,7 +9,7 @@ The LLVM 0.8.21 minimal Windows archive uses relative symlinks from tool names t
 
 Requires Windows x64, Bazel 9.2.0, and symlink creation privileges. The container case additionally requires a Windows Server 2022 host and Docker running Windows containers. GitHub Actions runs both cases on `windows-2022`.
 
-Each variant uses a separate Bazel workspace. The actual upstream extension fetches its checksum-pinned archive. The patched variant applies `hardlinks.patch` to the extension, exercising Bazel's `patch_cmds_win` execution rather than invoking a substitute script.
+Each variant uses a separate Bazel workspace with `--windows_enable_symlinks`; without this flag Bazel copies file symlinks, hiding the behavior under test. The actual upstream extension fetches its checksum-pinned archive. The patched variant applies `hardlinks.patch` to the extension, exercising Bazel's `patch_cmds_win` execution rather than invoking a substitute script.
 
 Assertions:
 
