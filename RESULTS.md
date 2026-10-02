@@ -34,3 +34,13 @@ Patched explicit-MSVC-host compilation succeeds: 393 actions, producing `hello.e
 - C stdio policy: requires a real interoperability/runtime example before presenting it as an upstream bug.
 
 Raw machine logs and build outputs are intentionally not committed. An unrelated download, missing executable, license gate, or patch-application error is not a reproduced compiler/toolchain defect.
+
+## Windows archive hardlinks — 2026-10-02
+
+[Windows Server 2022 GitHub Actions run](https://github.com/longlho/hermetic-llvm-repros/actions/runs/37016306075) passed at `a9ecda8`, using Bazel 9.2.0, hermetic-llvm 0.8.21, and its indexed LLVM 23.1.0 archive.
+
+- With `--windows_enable_symlinks`, upstream `clang-cl.exe` retains relative target `..\bin\llvm.exe`. Host compiler/linker launch and header-free C compilation pass. Process-isolated Server Core container launch from a bind-mounted physical repository-cache directory fails with `ERROR_PATH_NOT_FOUND (3)`.
+- Applying the candidate through the real module extension removes file symlinks. `clang-cl.exe` and `lld-link.exe` share hardlink identity with `llvm.exe`. Host launch, C compilation, and container launch pass.
+- A separate relative-link fixture reproduces the same failure and passes after the exact patch command. A changed PowerShell location and repeated conversion also pass.
+
+This verifies the mounted-volume failure and hardlink fix on x64 Docker bind mounts. It does not validate Kubernetes PVC integration, ARM64 execution, or a full SDK application build. Default Bazel file-copy behavior without the symlink flag does not reproduce this failure.
