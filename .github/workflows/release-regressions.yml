@@ -1,0 +1,26 @@
+name: LLVM release regressions
+on:
+  push:
+    paths: ['**/MODULE.bazel', '**/*.patch', 'run.py', 'verify-release.py', '.github/workflows/release-regressions.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {group: bindgen, os: macos-15}
+          - {group: go, os: macos-15}
+          - {group: msvc, os: macos-15}
+          - {group: windows, os: windows-2022}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: bazel-contrib/setup-bazel@8d2cb86a3680a820c3e219597279ce3f80d17a47
+        with:
+          bazelisk-cache: true
+      - name: Verify upstream and candidate outcomes
+        run: python verify-release.py ${{ matrix.group }}
