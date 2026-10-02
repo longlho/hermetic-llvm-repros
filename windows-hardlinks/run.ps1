@@ -9,6 +9,33 @@ if ($Container) {
     if ($LASTEXITCODE) { throw 'Cannot pull Windows container image' }
 }
 
+function Test-ContainerLaunch($Source, $Destination, $Expected) {
+    $probe = @'
+$ErrorActionPreference = 'Stop'
+try {
+    $p = New-Object System.Diagnostics.Process
+    $p.StartInfo.FileName = 'C:\fixture\bin\clang-cl.exe'
+    $p.StartInfo.Arguments = '--version'
+    $p.StartInfo.UseShellExecute = $false
+    [void]$p.Start()
+    $p.WaitForExit()
+    exit $p.ExitCode
+} catch {
+    $e = $_.Exception
+    while ($e.InnerException) { $e = $e.InnerException }
+    if ($e -is [ComponentModel.Win32Exception] -and $e.NativeErrorCode -eq 3) {
+        Write-Output 'CreateProcessW: ERROR_PATH_NOT_FOUND (3)'
+        exit 33
+    }
+    throw
+}
+'@
+    $probe = $probe.Replace('C:\fixture', $Destination)
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($probe))
+    docker run --rm --isolation=process --mount "type=bind,source=$Source,target=$Destination,readonly" $image powershell.exe -NoProfile -EncodedCommand $encoded
+    if ($LASTEXITCODE -ne $Expected) { throw "Container returned $LASTEXITCODE; expected $Expected" }
+}
+
 foreach ($variant in @('upstream', 'patched')) {
     $workspace = Join-Path $work $variant
     New-Item -ItemType Directory -Force $workspace | Out-Null
@@ -46,33 +73,42 @@ foreach ($variant in @('upstream', 'patched')) {
         & $clang /nologo /c "$workspace/probe.c" "/Fo$workspace/probe.obj"
         if ($LASTEXITCODE -or -not (Test-Path "$workspace/probe.obj")) { throw 'Host compilation failed' }
         if ($Container) {
-            # Same mounted repository and native process API for both variants.
-            $probe = @'
-$ErrorActionPreference = 'Stop'
-try {
-    $p = New-Object System.Diagnostics.Process
-    $p.StartInfo.FileName = 'C:\fixture\bin\clang-cl.exe'
-    $p.StartInfo.Arguments = '--version'
-    $p.StartInfo.UseShellExecute = $false
-    [void]$p.Start()
-    $p.WaitForExit()
-    exit $p.ExitCode
-} catch {
-    $e = $_.Exception
-    while ($e.InnerException) { $e = $e.InnerException }
-    if ($e -is [ComponentModel.Win32Exception] -and $e.NativeErrorCode -eq 3) {
-        Write-Output 'CreateProcessW: ERROR_PATH_NOT_FOUND (3)'
-        exit 33
-    }
-    throw
-}
-'@
-            $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($probe))
-            docker run --rm --isolation=process --mount "type=bind,source=$repo,target=C:\fixture,readonly" $image powershell.exe -NoProfile -EncodedCommand $encoded
-            $result = $LASTEXITCODE
-            $expected = if ($variant -eq 'upstream') { 33 } else { 0 }
-            if ($result -ne $expected) { throw "Container $variant returned $result; expected $expected" }
+            # Preserve absolute link targets: relocation is a different failure.
+            Test-ContainerLaunch $repo $repo 0
         }
         Write-Output "PASS: $variant archive layout, host launch, compile; container=$Container"
     } finally { Pop-Location }
 }
+
+# Isolate relative-link failure from Bazel's absolute-link extraction behavior.
+$relative = Join-Path $work 'relative fixture'
+New-Item -ItemType Directory -Force "$relative/bin" | Out-Null
+Copy-Item "$repo/bin/llvm.exe" "$relative/bin/llvm.exe"
+Push-Location "$relative/bin"
+try {
+    cmd /c 'mklink clang-cl.exe llvm.exe'
+    if ($LASTEXITCODE) { throw 'Cannot create relative symlink' }
+} finally { Pop-Location }
+if ([IO.Path]::IsPathRooted(@((Get-Item "$relative/bin/clang-cl.exe").Target)[0])) { throw 'Fixture link must be relative' }
+& "$relative/bin/clang-cl.exe" --version
+if ($LASTEXITCODE) { throw 'Relative symlink must work on host' }
+if ($Container) { Test-ContainerLaunch $relative 'C:\fixture' 33 }
+
+# Read exact command from candidate patch; no duplicate implementation.
+$commandLines = Get-Content "$PSScriptRoot/hardlinks.patch" | Where-Object { $_ -match '^\+    "' }
+$command = ($commandLines | ForEach-Object { $_.Substring(1).Trim().TrimEnd(',') | ConvertFrom-Json }) -join ' '
+$previousDirectory = [Environment]::CurrentDirectory
+try {
+    [Environment]::CurrentDirectory = $relative
+    Set-Location $env:TEMP  # Simulate a PowerShell profile changing location.
+    Invoke-Expression $command
+    if ((Get-Item "$relative/bin/clang-cl.exe").LinkType -ne 'HardLink') { throw 'Relative fixture was not relinked' }
+    Invoke-Expression $command  # Conversion must be idempotent.
+} finally {
+    [Environment]::CurrentDirectory = $previousDirectory
+    Set-Location $root
+}
+& "$relative/bin/clang-cl.exe" --version
+if ($LASTEXITCODE) { throw 'Relinked fixture must work on host' }
+if ($Container) { Test-ContainerLaunch $relative 'C:\fixture' 0 }
+Write-Output 'PASS: relative symlink negative control, hardlink fix, changed PowerShell location, idempotence'

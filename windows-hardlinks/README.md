@@ -16,6 +16,8 @@ Assertions:
 - Upstream archive retains file symlinks; patched archive has none.
 - Patched `clang-cl.exe` and `lld-link.exe` share hardlink identity with `llvm.exe`.
 - Both host variants launch the compiler/linker and compile a header-free C file.
-- In a process-isolated container with the repository bind-mounted, upstream `CreateProcessW` must fail with Windows error 3. Patched launch must succeed. Other failures, or a baseline that succeeds, fail the test.
+- Both extracted repositories launch inside a process-isolated container mounted at the original absolute path. Bazel 9.2.0 creates absolute symlinks; relocating the repository would introduce a different broken-target failure.
+- A separate fixture uses the same real `llvm.exe` with an explicitly relative `clang-cl.exe` symlink. It launches on the host, must fail with Windows error 3 on a container bind mount, then must launch after the exact command from the patch converts it to a hardlink.
+- Conversion tolerates a changed PowerShell location and a second invocation. Unexpected baseline success or any unrelated failure fails the test.
 
 The container test covers a Docker bind mount, not a Kubernetes PVC. Host-only success does not reproduce the container defect. It does not test ARM64, a full SDK build, or arbitrary symlink graphs. Public upstream source remains covered by `../UPSTREAM-LICENSE`. No application source or private build configuration is used.
