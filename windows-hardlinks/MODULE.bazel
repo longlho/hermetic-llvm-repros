@@ -1,4 +1,12 @@
 module(name = "windows_hardlinks_repro")
 bazel_dep(name = "llvm", version = "0.8.21")
 minimal = use_extension("@llvm//extensions:llvm_toolchain_minimal.bzl", "llvm_toolchain_minimal")
-use_repo(minimal, "llvm-toolchain-minimal-windows-amd64")
+use_repo(
+    minimal,
+    "llvm-toolchain-minimal-darwin-amd64",
+    "llvm-toolchain-minimal-darwin-arm64",
+    "llvm-toolchain-minimal-linux-amd64",
+    "llvm-toolchain-minimal-linux-arm64",
+    "llvm-toolchain-minimal-windows-amd64",
+    "llvm-toolchain-minimal-windows-arm64",
+)
