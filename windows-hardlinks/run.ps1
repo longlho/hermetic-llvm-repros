@@ -64,6 +64,7 @@ foreach ($variant in @('upstream', 'patched')) {
         $links = @(Get-ChildItem "$repo/bin" -File -Force | Where-Object LinkType -eq SymbolicLink)
         if ($variant -eq 'upstream') {
             if ($links.Count -eq 0 -or (Get-Item $clang).LinkType -ne 'SymbolicLink') { throw 'Baseline did not retain archive symlinks' }
+            if ([IO.Path]::IsPathRooted(@((Get-Item $clang).Target)[0])) { throw 'Expected relative archive link' }
         } else {
             if ($links.Count -ne 0) { throw 'Patched repository still contains symlinks' }
             foreach ($tool in @($clang, $linker)) {
@@ -80,14 +81,14 @@ foreach ($variant in @('upstream', 'patched')) {
         & $clang /nologo /c "$workspace/probe.c" "/Fo$workspace/probe.obj"
         if ($LASTEXITCODE -or -not (Test-Path "$workspace/probe.obj")) { throw 'Host compilation failed' }
         if ($Container) {
-            # Preserve absolute link targets: relocation is a different failure.
-            Test-ContainerLaunch $repo $repo 0
+            $expected = if ($variant -eq 'upstream') { 33 } else { 0 }
+            Test-ContainerLaunch $repo $repo $expected
         }
         Write-Output "PASS: $variant archive layout, host launch, compile; container=$Container"
     } finally { Pop-Location }
 }
 
-# Isolate relative-link failure from Bazel's absolute-link extraction behavior.
+# Small fixture covers location changes and idempotence with the same command.
 $relative = Join-Path $work 'relative fixture'
 New-Item -ItemType Directory -Force "$relative/bin" | Out-Null
 Copy-Item "$repo/bin/llvm.exe" "$relative/bin/llvm.exe"
