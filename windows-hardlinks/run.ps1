@@ -52,8 +52,15 @@ foreach ($variant in @('upstream', 'patched')) {
         $repos = @(Get-ChildItem "$outputBase/external" -Directory | Where-Object { $_.Name.EndsWith('+llvm-toolchain-minimal-windows-amd64') })
         if ($repos.Count -ne 1) { throw "Expected one archive repository, got $($repos.Count)" }
         $repo = $repos[0].FullName
+        # Bazel 9 external entries may be junctions into its repository cache.
+        if ($repos[0].LinkType) {
+            $target = @($repos[0].Target)[0]
+            $repo = if ([IO.Path]::IsPathRooted($target)) { $target } else { [IO.Path]::GetFullPath((Join-Path $repos[0].Parent.FullName $target)) }
+        }
+        $repo = $repo -replace '^\\\\\?\\', ''
         $clang = Join-Path $repo 'bin/clang-cl.exe'
         $linker = Join-Path $repo 'bin/lld-link.exe'
+        Get-Item $clang | Select-Object FullName, LinkType, Target | Format-List
         $links = @(Get-ChildItem "$repo/bin" -File -Force | Where-Object LinkType -eq SymbolicLink)
         if ($variant -eq 'upstream') {
             if ($links.Count -eq 0 -or (Get-Item $clang).LinkType -ne 'SymbolicLink') { throw 'Baseline did not retain archive symlinks' }
