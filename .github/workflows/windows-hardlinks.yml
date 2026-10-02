@@ -1,0 +1,21 @@
+name: Windows LLVM hardlinks
+on:
+  push:
+    paths: ['windows-hardlinks/**', '.github/workflows/windows-hardlinks.yml']
+  pull_request:
+    paths: ['windows-hardlinks/**', '.github/workflows/windows-hardlinks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: bazel-contrib/setup-bazel@8d2cb86a3680a820c3e219597279ce3f80d17a47
+        with:
+          bazelisk-cache: true
+      - name: Compare upstream and patched archives on host and container volume
+        shell: powershell
+        run: ./windows-hardlinks/run.ps1 -Container

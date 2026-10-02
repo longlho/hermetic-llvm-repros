@@ -1,0 +1,35 @@
+--- a/extensions/llvm_toolchain_minimal.bzl
++++ b/extensions/llvm_toolchain_minimal.bzl
+@@ -87,6 +87,21 @@
+         for target in _TARGETS
+     }
+ 
++_WINDOWS_HARDLINK_CMD = " ".join([
++    "$ErrorActionPreference = 'Stop'; Set-Location -LiteralPath ([Environment]::CurrentDirectory);",
++    "Get-ChildItem -LiteralPath bin -Force -File -Attributes ReparsePoint |",
++    "Where-Object { $_.LinkType -eq 'SymbolicLink' } |",
++    "ForEach-Object {",
++    "$t0 = @($_.Target)[0];",
++    "$t = if ([IO.Path]::IsPathRooted($t0)) { $t0 } else { [IO.Path]::GetFullPath((Join-Path $_.DirectoryName $t0)) };",
++    "if (-not (Test-Path -LiteralPath $t -PathType Leaf)) { throw ('Symlink target not found: ' + $t) };",
++    "Remove-Item -LiteralPath $_.FullName -Force;",
++    "New-Item -ItemType HardLink -Path $_.FullName -Target $t | Out-Null",
++    "};",
++    "$left = @(Get-ChildItem -LiteralPath bin -Force -File -Attributes ReparsePoint | Where-Object { $_.LinkType -eq 'SymbolicLink' });",
++    "if ($left.Count) { throw ('Symlinks left: ' + ($left.FullName -join ', ')) }",
++])
++
+ def _llvm_toolchain_minimal_impl(module_ctx):
+     index = _get_index(module_ctx)
+     repo_specs = _release_repo_specs(index)
+@@ -97,6 +112,10 @@
+             build_file = spec.build_file,
+             sha256 = spec.sha256,
+             urls = spec.urls,
++            # The archive links each tool to the multicall llvm.exe with a
++            # relative symlink, which Windows containers cannot follow on a
++            # mounted volume. Hard links need no symlink support.
++            patch_cmds_win = [_WINDOWS_HARDLINK_CMD] if repo_name.startswith("llvm-toolchain-minimal-windows-") else [],
+         )
+ 
+     metadata_kwargs = {}

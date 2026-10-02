@@ -1,12 +1,13 @@
 # hermetic-llvm standalone repros
 
-Small public-source experiments against the official **hermetic-llvm 0.8.21** release, using Bazel 9.2.0. Four folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
+Small public-source experiments against the official **hermetic-llvm 0.8.21** release, using Bazel 9.2.0. Five folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
 
 | Folder | Question |
 | --- | --- |
 | `bindgen-resource-headers` | Does a driver-independent bindgen consumer receive compiler builtin headers? |
 | `macos-go-link` | Do Go platform/exec transitions lose a compiler-rt archive path? Are public directory providers sufficient? |
 | `msvc-integration` | Which CRT, header, library, and VFS assumptions fail independently? |
+| `windows-hardlinks` | Do relative tool symlinks fail on Windows container bind mounts, and do hardlinks fix them? |
 | `windows-bootstrap` | Does native Windows compilation depend on its own SDK overlay generator? |
 
 ## Run
