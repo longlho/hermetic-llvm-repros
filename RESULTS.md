@@ -44,3 +44,23 @@ Raw machine logs and build outputs are intentionally not committed. An unrelated
 - A separate relative-link fixture reproduces the same failure and passes after the exact patch command. A changed PowerShell location and repeated conversion also pass.
 
 This verifies the mounted-volume failure and hardlink fix on x64 Docker bind mounts. It does not validate Kubernetes PVC integration, ARM64 execution, or a full SDK application build. Default Bazel file-copy behavior without the symlink flag does not reproduce this failure.
+
+## hermetic-llvm 0.8.24 / LLVM 23.1.2 — 2026-10-02
+
+[Release regression matrix](https://github.com/longlho/hermetic-llvm-repros/actions/runs/37019040457): all 19 expected outcomes pass on macOS ARM64 and native Windows x64. [Windows mounted-volume workflow](https://github.com/longlho/hermetic-llvm-repros/actions/runs/37019040785) also passes. Both ran source revision `291e37a` with Bazel 9.2.0.
+
+| Case | Unpatched 0.8.24 | Candidate / conclusion |
+| --- | --- | --- |
+| Bindgen, native macOS and Linux cross-target | Both pass | Fixed upstream; removed obsolete #755 backport. |
+| Go plain, platform transition, exec transition | All pass | No independent failure; experimental Go workaround unnecessary for these cases. These also passed on 0.8.21, so this is not a newly fixed upstream bug. |
+| SDK public directory / private helper | Public passes; private helper rejects visibility | Use public provider; no visibility patch needed for this fixture. |
+| MSVC `limits.h` | `_I64_MAX` undeclared | Header-export patch passes; still needed. |
+| MSVC compatibility archive | `legacy_stdio_definitions.lib` not found | Library-export patch passes; still needed. |
+| C stdio policy | C source receives ISO-wide-stdio define | C++-only candidate passes; remains a policy probe, not runtime ABI proof. |
+| Target-local static CRT | Dynamic CRT selected | Candidate rejects incompatible features during analysis. |
+| Graph-wide static CRT | Not supplied upstream | Candidate static setting builds successfully. |
+| VFS cwd / relocation | Original cwd passes; nested cwd fails | Relocated overlay control passes; generator fix remains needed. |
+| Native Windows explicit MSVC host | SDK-overlay dependency cycle | Bootstrap candidate builds successfully. |
+| Windows container mounted archive | Relative tool symlink fails with error 3 | Hardlink patch passes; no symlinks remain and file identity is verified. |
+
+The CRT negative control requires its precise conflicting-feature diagnostic; unrelated build or download failures do not count as reproduction. Windows bootstrap checks compilation; hardlink tests check process launch on a Docker bind mount. Neither establishes Kubernetes PVC or ARM64 runtime behavior.

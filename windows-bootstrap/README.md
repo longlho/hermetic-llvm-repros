@@ -2,7 +2,7 @@
 
 **Suspected issue:** the Windows toolchain consumes generated SDK overlays while compiling the generator that produces them, creating a dependency cycle.
 
-**Repro:** an otherwise empty `cc_binary` on a native Windows x64 host, using only the official 0.8.21 module and explicitly selecting `--host_platform=@llvm//platforms:windows_x86_64_msvc`. No Rust, Cargo, or application build rules are involved.
+**Repro:** an otherwise empty `cc_binary` on a native Windows x64 host, using only the official 0.8.24 module and explicitly selecting `--host_platform=@llvm//platforms:windows_x86_64_msvc`. No Rust, Cargo, or application build rules are involved.
 
 From the repo root in Windows PowerShell, with Bazel and Git Bash installed, after reviewing the Microsoft runtime/SDK licenses:
 
