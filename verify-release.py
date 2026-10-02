@@ -26,7 +26,7 @@ GROUPS = {
         Case('msvc-integration', 'stdio-mode', failure='ISO wide stdio|stdio.*mode|_CRT_STDIO_ISO_WIDE_SPECIFIERS'),
         Case('msvc-integration', 'stdio-mode', 'patched'),
         Case('msvc-integration', 'crt-local', failure='static CRT requested but dynamic CRT selected'),
-        Case('msvc-integration', 'crt-local', 'patched', failure='mutually exclusive'),
+        Case('msvc-integration', 'crt-local', 'patched', failure='dynamic_crt_configuration is provided by all of the following features: msvc_configured_dynamic_crt static_link_msvcrt'),
         Case('msvc-integration', 'crt-static', 'patched'),
         Case('msvc-integration', 'overlay'),
     ],

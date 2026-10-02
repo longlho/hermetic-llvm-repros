@@ -1,6 +1,6 @@
 # Windows archive tool links
 
-The LLVM 0.8.21 minimal Windows archive uses relative symlinks from tool names to `llvm.exe`. This experiment tests replacing those links with hardlinks during Bazel repository extraction.
+The LLVM 0.8.24 minimal Windows archive uses relative symlinks from tool names to `llvm.exe`. This experiment tests replacing those links with hardlinks during Bazel repository extraction.
 
 ```powershell
 ./windows-hardlinks/run.ps1

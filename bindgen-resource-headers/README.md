@@ -8,9 +8,8 @@ From the repo root on macOS with an installed SDK:
 
 ```sh
 python3 run.py bindgen-resource-headers --case bindgen-linux --host-sdk
-python3 run.py bindgen-resource-headers --case bindgen-linux --variant patched --host-sdk
 ```
 
 **Observed:** unmodified 0.8.21 fails with `'stddef.h' file not found`; patched build succeeds and emits `probe.rs`. Native macOS `--case bindgen` succeeds unpatched, so the target platform matters.
 
-**Upstream:** already fixed by merged [#755](https://github.com/hermeticbuild/hermetic-llvm/pull/755). `upstream-755.patch` is that public diff. This is release-backport evidence, not a reason to open a duplicate PR.
+**Upstream:** already fixed by merged [#755](https://github.com/hermeticbuild/hermetic-llvm/pull/755). The backport was removed when this repo upgraded to 0.8.24: native macOS and Linux cross-target cases both pass unpatched. Historical failing 0.8.21 fixtures remain in Git history.
