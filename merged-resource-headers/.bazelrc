@@ -1,0 +1,8 @@
+common --experimental_cc_static_library
+common --experimental_platform_in_output_dir
+common --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+common --repo_env=BAZEL_NO_APPLE_CPP_TOOLCHAIN=1
+common --repo_env=BAZEL_DO_NOT_DETECT_SWIFT_TOOLCHAIN=1
+common --jobs=4
+common --test_output=errors
+common --noexperimental_use_platforms_in_output_dir_legacy_heuristic

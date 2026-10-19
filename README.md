@@ -1,9 +1,10 @@
 # hermetic-llvm standalone repros
 
-Small public-source experiments against the official **hermetic-llvm 0.8.24** release, using Bazel 9.2.0. Five folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
+Small public-source experiments against the official **hermetic-llvm 0.8.24** release, using Bazel 9.2.0. Six folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
 
 | Folder | Question |
 | --- | --- |
+| `merged-resource-headers` | Do combined compile/link flags retain compiler builtin headers, and does 0.8.25 fix the failure? |
 | `bindgen-resource-headers` | Does a driver-independent bindgen consumer receive compiler builtin headers? |
 | `macos-go-link` | Do Go platform/exec transitions lose a compiler-rt archive path? Are public directory providers sufficient? |
 | `msvc-integration` | Which CRT, header, library, and VFS assumptions fail independently? |
@@ -15,13 +16,14 @@ Small public-source experiments against the official **hermetic-llvm 0.8.24** re
 Install Bazel 9.2.0 (or Bazelisk), Python 3.10+, and Git. Run from this repository:
 
 ```sh
+python3 verify-release.py resource-headers
 python3 run.py macos-go-link --case exec-transition --host-sdk
 python3 run.py bindgen-resource-headers --case bindgen-linux --host-sdk
 python3 run.py msvc-integration --case limits --accept-msvc-eula --host-sdk
 python3 run.py msvc-integration --case limits --variant patched --accept-msvc-eula --host-sdk
 ```
 
-`--host-sdk` is a macOS-only option using an installed Xcode/Command Line Tools SDK; omit it elsewhere. This intentionally avoids conflating SDK archive availability with compiler behavior. Windows target tests require explicit acceptance of the Microsoft runtime and SDK licenses. `--bazel /path/to/bazel` chooses an executable. No user/system Bazel configs, remote execution, or remote caches are imported.
+`--host-sdk` is a macOS-only option using an installed Xcode/Command Line Tools SDK; omit it elsewhere. This intentionally avoids conflating SDK archive availability with compiler behavior. Windows target tests require explicit acceptance of the Microsoft runtime and SDK licenses. `--bazel /path/to/bazel` chooses an executable. `--llvm-version 0.8.25` compares an unmodified newer release in a separate workspace. No user/system Bazel configs, remote execution, or remote caches are imported.
 
 For the native Windows cycle, run in PowerShell on Windows x64, with Git Bash installed:
 
@@ -42,4 +44,4 @@ See [RESULTS.md](RESULTS.md) for observed outcomes and limits. Repros that pass 
 
 ## Release regression checks
 
-`python3 verify-release.py bindgen`, `go`, or `msvc` checks exact baseline and candidate outcomes on macOS ARM64. `python verify-release.py windows` checks native Windows bootstrap. The separate Windows hardlink workflow tests process-isolated container bind mounts. These public-source workflows print test diagnostics; earlier local raw logs remain ignored.
+`python3 verify-release.py resource-headers` checks the 0.8.24 failure and 0.8.25 fix on Linux. `python3 verify-release.py bindgen`, `go`, or `msvc` checks exact baseline and candidate outcomes on macOS ARM64. `python verify-release.py windows` checks native Windows bootstrap. The separate Windows hardlink workflow tests process-isolated container bind mounts. These public-source workflows print test diagnostics; earlier local raw logs remain ignored.

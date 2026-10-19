@@ -64,3 +64,19 @@ This verifies the mounted-volume failure and hardlink fix on x64 Docker bind mou
 | Windows container mounted archive | Relative tool symlink fails with error 3 | Hardlink patch passes; no symlinks remain and file identity is verified. |
 
 The CRT negative control requires its precise conflicting-feature diagnostic; unrelated build or download failures do not count as reproduction. Windows bootstrap checks compilation; hardlink tests check process launch on a Docker bind mount. Neither establishes Kubernetes PVC or ARM64 runtime behavior.
+
+## Merged-resource compile/link headers (Linux x86-64)
+
+Bazel 9.2.0, public LLVM releases, sandboxed local execution:
+
+| Case | LLVM 0.8.24 | LLVM 0.8.25 |
+| --- | --- | --- |
+| C compile-only, `stddef.h` | Pass | Not required for the differential |
+| C compile + executable link flags, `stddef.h` | Fails: `fatal error: 'stddef.h' file not found` | Pass |
+
+`python3 verify-release.py resource-headers` verifies these three outcomes.
+A candidate patch exposing individual resource headers also passed on 0.8.24,
+but is unnecessary because upgrading to the public 0.8.25 release fixes the
+same action. No candidate patch is retained. See
+[the standalone repro](merged-resource-headers/README.md) for source references
+and scope.

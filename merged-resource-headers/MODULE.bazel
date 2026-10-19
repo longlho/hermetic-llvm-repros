@@ -1,0 +1,6 @@
+module(name = "merged_resource_headers_repro")
+
+bazel_dep(name = "llvm", version = "0.8.24")
+bazel_dep(name = "rules_cc", version = "0.2.25")
+
+register_toolchains("@llvm//toolchain:all")
