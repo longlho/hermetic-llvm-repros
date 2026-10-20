@@ -75,10 +75,11 @@ User/system/workspace Bazel configs are disabled. Only public sources are used.
 | Android ARMv7 socket2 dependency | Missing libc for `cfg(unix)` | Compiles after Android EABI cfg normalization |
 | Windows x64 Rust+C executable | clang-cl treats `/LIBPATH` and `/PDBALTPATH` as filenames | Cross-links with the corresponding lld-link |
 | Windows ARM64 Rust+C executable | Same driver-argument failure | Cross-links; PE header is ARM64 |
+| Windows ARM64 ring 0.17.14 native build | Overrides hermetic clang-cl with missing bare clang | Retains clang-cl and compiles the complete native library |
 | Windows x64 Cargo CRT feature | Build-script target cfg omits `crt-static` | Script observes configured static CRT |
 | Windows ARM64 Cargo CRT feature | Same missing target feature | Script observes configured static CRT |
-| iOS ARM64 simulator Rust+C dynamic-library dependency | macOS verification pending; verifier requires `Runtime linking is not supported on ios` | Local positive unavailable; standalone macOS CI is required |
+| iOS ARM64 simulator Rust+C dynamic-library dependency | `Runtime linking is not supported on ios` | Real Rust+C cross-link passes on macOS 14 |
 
-The five Linux fixture rows each check an expected upstream failure and a
-candidate success. These are ten verified outcomes, not target runtime tests.
-The iOS fixture is not claimed green until its macOS workflow completes.
+The six Linux fixture rows each check an expected upstream failure and a
+candidate success. These are twelve verified outcomes, not target runtime tests.
+The [macOS 14 workflow](https://github.com/longlho/hermetic-llvm-repros/actions/runs/39347793775/job/118384510845) also passes both iOS outcomes.

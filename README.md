@@ -58,3 +58,5 @@ See [RESULTS.md](RESULTS.md) for observed outcomes and limits. Repros that pass 
 ## Release regression checks
 
 `python3 verify-release.py bindgen`, `go`, or `msvc` checks exact baseline and candidate outcomes on macOS ARM64. `python verify-release.py windows` checks native Windows bootstrap. The separate Windows hardlink workflow tests process-isolated container bind mounts. These public-source workflows print test diagnostics; earlier local raw logs remain ignored.
+
+`rust-ring-arm64/` isolates ring 0.17.14 replacing an explicitly configured clang-cl with bare `clang` during Windows ARM64 native compilation. Run `python3 verify-rust-cross.py ring --accept-msvc-eula`.

@@ -1,9 +1,9 @@
 name: Rust cross-toolchain repros
 on:
   pull_request:
-    paths: ['rust-android-eabi/**', 'rust-msvc-linker/**', 'ios-rpaths/**', 'verify-rust-cross.py', '.github/workflows/rust-cross-toolchains.yml']
+    paths: ['rust-android-eabi/**', 'rust-msvc-linker/**', 'rust-ring-arm64/**', 'ios-rpaths/**', 'verify-rust-cross.py', '.github/workflows/rust-cross-toolchains.yml']
   push:
-    paths: ['rust-android-eabi/**', 'rust-msvc-linker/**', 'ios-rpaths/**', 'verify-rust-cross.py', '.github/workflows/rust-cross-toolchains.yml']
+    paths: ['rust-android-eabi/**', 'rust-msvc-linker/**', 'rust-ring-arm64/**', 'ios-rpaths/**', 'verify-rust-cross.py', '.github/workflows/rust-cross-toolchains.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [msvc, msvc-crt]
+        group: [msvc, msvc-crt, ring]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3
