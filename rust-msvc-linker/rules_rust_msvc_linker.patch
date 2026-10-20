@@ -1,0 +1,80 @@
+--- a/rust/private/rustc.bzl
++++ b/rust/private/rustc.bzl
+@@ -413,10 +413,11 @@
+     "rpaths",
+     "rust_linker",
+     "target_arch",
++    "use_msvc_linker",
+     "variables",
+ ])
+ 
+-def _get_linker_config(ctx, crate_type, toolchain, cc_toolchain, feature_configuration, rpaths, add_flags_for_binary):
++def _get_linker_config(ctx, crate_type, toolchain, cc_toolchain, feature_configuration, rpaths, add_flags_for_binary, for_rustc = False):
+     user_link_flags = get_cc_user_link_flags(ctx)
+ 
+     cc_linker = None
+@@ -456,6 +457,7 @@
+ 
+     use_bpf_linker = toolchain.target_arch in ("bpfeb", "bpfel") and toolchain.linker
+     use_rust_linker = not cc_linker or toolchain.linker_preference == "rust" or use_bpf_linker
++    use_msvc_linker = for_rustc and not use_rust_linker and toolchain.target_abi == "msvc" and cc_linker.rsplit("/", 1)[-1] in ("clang-cl", "clang-cl.exe")
+     if use_rust_linker and not toolchain.linker:
+         fail("No linker available for rustc. Either `rust_toolchain.linker` must be set or a `cc_toolchain` configured for the current configuration.")
+ 
+@@ -466,7 +468,8 @@
+         action_name = action_name,
+         variables = link_variables,
+         rust_linker = toolchain.linker if use_rust_linker else None,
+-        is_direct_driver = use_rust_linker and toolchain.linker_type == "direct",
++        is_direct_driver = use_msvc_linker or (use_rust_linker and toolchain.linker_type == "direct"),
++        use_msvc_linker = use_msvc_linker,
+         target_arch = toolchain.target_arch,
+         rpaths = rpaths,
+     )
+@@ -474,10 +477,13 @@
+ def _get_linker_path(linker_config):
+     if linker_config.rust_linker:
+         return linker_config.rust_linker.path
+-    return cc_common.get_tool_for_action(
++    linker = cc_common.get_tool_for_action(
+         feature_configuration = linker_config.feature_configuration,
+         action_name = linker_config.action_name,
+     )
++    if linker_config.use_msvc_linker:
++        return linker.rsplit("/", 1)[0] + "/lld-link" + (".exe" if linker.endswith(".exe") else "")
++    return linker
+ 
+ def _get_linker_env(linker_config):
+     if linker_config.variables == None:
+@@ -496,6 +502,23 @@
+             action_name = linker_config.action_name,
+             variables = linker_config.variables,
+         ))
++
++    if linker_config.use_msvc_linker:
++        msvc_args = []
++        forward_next = False
++        for arg in link_args:
++            arg = arg.removeprefix("/clang:")
++            if forward_next:
++                if arg != "-no-pie":
++                    msvc_args.append(arg)
++                forward_next = False
++            elif arg == "-Xlinker":
++                forward_next = True
++            elif arg.lower().endswith(".lib") or arg.upper().startswith("/LIBPATH:") or arg.upper().startswith("-LIBPATH:"):
++                msvc_args.append(arg)
++            elif arg == "/Brepro":
++                msvc_args.append(arg)
++        return msvc_args
+ 
+     if linker_config.rust_linker:
+         # Make sure we include RPATHs for Rust ABI dylibs even when no cc_toolchain.
+@@ -1506,6 +1529,7 @@
+                 feature_configuration,
+                 rpaths,
+                 add_flags_for_binary = add_flags_for_binary,
++                for_rustc = True,
+             )
+ 
+             ld_is_direct_driver = linker_config.is_direct_driver

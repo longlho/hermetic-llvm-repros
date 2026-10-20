@@ -1,0 +1,20 @@
+--- a/rs/private/cfg_parser.bzl
++++ b/rs/private/cfg_parser.bzl
+@@ -224,11 +224,16 @@
+     vendor_part = _get(parts, 1, "unknown")
+     os_raw_part = _get(parts, 2, "none")
+     env_part = "-".join(parts[3:])
++    if os_raw_part == "androideabi":
++        os_raw_part = "android"
++        arch_part = "arm"
+     os_norm = _normalize_os(os_raw_part)
++    if os_norm == "android":
++        vendor_part = "unknown"
+     fam = _family_for_arch_and_os(arch_part, os_norm)
+     width = _pointer_width_for_arch(arch_part)
+     endian = _endian_for_arch(arch_part)
+-    abi_guess = _abi_from_env(env_part)
++    abi_guess = "eabi" if triple.endswith("androideabi") else _abi_from_env(env_part)
+ 
+     return {
+         "_triple": triple,

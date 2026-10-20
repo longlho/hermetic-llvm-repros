@@ -1,0 +1,8 @@
+[package]
+name="ring-arm64-probe"
+version="0.1.0"
+edition="2024"
+[lib]
+path="lib.rs"
+[dependencies]
+ring="=0.17.14"
