@@ -80,3 +80,18 @@ but is unnecessary because upgrading to the public 0.8.25 release fixes the
 same action. No candidate patch is retained. See
 [the standalone repro](merged-resource-headers/README.md) for source references
 and scope.
+
+## Bindgen recursive union template (Linux x86-64)
+
+Synthetic header, host target, libclang 22.1.8:
+
+| Bindgen | Unmodified source | Abstract-template guard |
+| --- | --- | --- |
+| 0.72.1 | Panics: `Not an item: ItemId(...)` | Generates bindings successfully |
+| 0.73.2 | Panics: `Not an item: ItemId(...)` | Generates bindings successfully |
+
+All four expected outcomes pass through
+`python3 bindgen-recursive-union/verify.py`. The ten-line header contains no
+includes. It reproduces the same panic as LLVM23 libc++'s recursive aligned
+union template reached through APM binding generation. See
+[the standalone fixture](bindgen-recursive-union/README.md).

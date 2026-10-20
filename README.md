@@ -1,9 +1,10 @@
 # hermetic-llvm standalone repros
 
-Small public-source experiments against the official **hermetic-llvm 0.8.24** release, using Bazel 9.2.0. Six folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
+Small public-source experiments against the official **hermetic-llvm 0.8.24** release, using Bazel 9.2.0. Seven folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
 
 | Folder | Question |
 | --- | --- |
+| `bindgen-recursive-union` | Does bindgen panic while inferring an abstract recursive union template layout? |
 | `merged-resource-headers` | Do combined compile/link flags retain compiler builtin headers, and does 0.8.25 fix the failure? |
 | `bindgen-resource-headers` | Does a driver-independent bindgen consumer receive compiler builtin headers? |
 | `macos-go-link` | Do Go platform/exec transitions lose a compiler-rt archive path? Are public directory providers sufficient? |
@@ -35,6 +36,11 @@ For the native Windows cycle, run in PowerShell on Windows x64, with Git Bash in
 Remove `-AnalyzeOnly` to compile. `-Bazel` selects Bazel; optional `-OutputUserRoot C:/b` gives Windows a short output path. Analysis results are not runtime proof.
 
 Each variant gets its own ignored `.work/` workspace. `upstream` uses the unmodified release. `patched` adds only that folder's candidate changes. Exit codes and raw logs are local under ignored `results/`; never publish those logs without manual review. Checked-in findings contain only sanitized diagnostics and platform descriptions.
+
+The separate [recursive union fixture](bindgen-recursive-union/README.md) tests
+bindgen 0.72.1 and 0.73.2 using Cargo and an installed libclang; it has no LLVM
+or SDK input. Run `python3 bindgen-recursive-union/verify.py` for its four
+baseline/candidate checks.
 
 ## Provenance
 

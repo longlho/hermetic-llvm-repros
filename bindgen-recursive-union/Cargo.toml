@@ -1,0 +1,12 @@
+[package]
+name = "bindgen-recursive-union-repro"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "probe"
+path = "main.rs"
+
+[dependencies]
+bindgen = "=0.72.1"
