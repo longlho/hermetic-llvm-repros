@@ -51,3 +51,5 @@ See [RESULTS.md](RESULTS.md) for observed outcomes and limits. Repros that pass 
 ## Release regression checks
 
 `python3 verify-release.py resource-headers` checks the 0.8.24 failure and 0.8.25 fix on Linux. `python3 verify-release.py bindgen`, `go`, or `msvc` checks exact baseline and candidate outcomes on macOS ARM64. `python verify-release.py windows` checks native Windows bootstrap. The separate Windows hardlink workflow tests process-isolated container bind mounts. These public-source workflows print test diagnostics; earlier local raw logs remain ignored.
+
+- [`apple-archive-append`](apple-archive-append/): proves the Apple libtool ar-compatible wrapper drops earlier `cc` archive batches, with an iOS simulator link comparison using LLVM's archiver.

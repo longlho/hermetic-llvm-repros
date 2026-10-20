@@ -1,0 +1,17 @@
+name: Apple archive append regression
+on:
+  push:
+    paths: ['apple-archive-append/**', '.github/workflows/apple-archive-append.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: macos-14
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install LLVM archive tool
+        run: rustup component add llvm-tools-preview
+      - name: Verify lost archive batch and LLVM archiver correction
+        run: python3 apple-archive-append/verify.py
