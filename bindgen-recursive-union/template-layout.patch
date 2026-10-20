@@ -1,0 +1,13 @@
+--- a/ir/comp.rs
++++ b/ir/comp.rs
+@@ -1102,6 +1102,10 @@
+     /// members. This is not ideal, but clang fails to report the size for these
+     /// kind of unions, see `test/headers/template_union.hpp`
+     pub(crate) fn layout(&self, ctx: &BindgenContext) -> Option<Layout> {
++        // An abstract template has no concrete layout before instantiation.
++        if !self.template_params.is_empty() {
++            return None;
++        }
+         // We can't do better than clang here, sorry.
+         if self.kind == CompKind::Struct {
+             return None;

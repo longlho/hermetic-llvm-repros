@@ -1,0 +1,53 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_rs//rs:rust_binary.bzl", "rust_binary")
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+
+cc_library(
+    name = "native",
+    srcs = ["native.c"],
+)
+
+rust_binary(
+    name = "probe",
+    srcs = ["main.rs"],
+    edition = "2024",
+    deps = [":native"],
+)
+
+platform(
+    name = "local_gnu",
+    constraint_values = ["@llvm//constraints/libc:gnu.2.28"],
+    parents = ["@platforms//host"],
+)
+
+platform(
+    name = "windows_x64",
+    flags = [
+        "--features=-dynamic_link_msvcrt",
+        "--features=static_link_msvcrt",
+        "--@rules_rust//rust/settings:extra_rustc_flag=-Ctarget-feature=+crt-static",
+    ],
+    parents = ["@rules_rs//rs/platforms:x86_64-pc-windows-msvc"],
+)
+
+platform(
+    name = "windows_arm64",
+    flags = [
+        "--features=-dynamic_link_msvcrt",
+        "--features=static_link_msvcrt",
+        "--@rules_rust//rust/settings:extra_rustc_flag=-Ctarget-feature=+crt-static",
+    ],
+    parents = ["@rules_rs//rs/platforms:aarch64-pc-windows-msvc"],
+)
+
+exports_files(["rules_rust_msvc_linker.patch"])
+
+cargo_build_script(
+    name = "crt_probe",
+    srcs = ["crt_build.rs"],
+    crate_name = "crt_probe",
+    edition = "2024",
+    version = "0.1.0",
+)
+
+exports_files(["rules_rust_build_script_target_cfg.patch"])

@@ -1,0 +1,12 @@
+platform(
+    name = "local_gnu",
+    constraint_values = ["@llvm//constraints/libc:gnu.2.28"],
+    parents = ["@platforms//host"],
+)
+
+platform(
+    name = "windows_arm64",
+    parents = ["@rules_rs//rs/platforms:aarch64-pc-windows-msvc"],
+)
+
+exports_files(["ring-windows-arm64-clang-cl.patch"])

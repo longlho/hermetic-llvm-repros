@@ -1,0 +1,23 @@
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_import.bzl", "cc_import")
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+exports_files(["rules_rust_ios_rpaths.patch"])
+
+cc_binary(
+    name = "libnative.dylib",
+    srcs = ["native.c"],
+    linkshared = True,
+)
+
+cc_import(
+    name = "native",
+    shared_library = ":libnative.dylib",
+)
+
+rust_binary(
+    name = "hello",
+    srcs = ["main.rs"],
+    edition = "2024",
+    deps = [":native"],
+)

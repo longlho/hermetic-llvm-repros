@@ -14,8 +14,14 @@ class Case:
     name: str
     variant: str = 'upstream'
     failure: str | None = None
+    llvm_version: str | None = None
 
 GROUPS = {
+    'resource-headers': [
+        Case('merged-resource-headers', 'compile_only'),
+        Case('merged-resource-headers', 'compile_and_link', failure="fatal error: 'stddef.h' file not found"),
+        Case('merged-resource-headers', 'compile_and_link', llvm_version='0.8.25'),
+    ],
     'bindgen': [Case('bindgen-resource-headers', name) for name in ('bindgen', 'bindgen-linux')],
     'go': [Case('macos-go-link', name) for name in ('plain', 'transitioned', 'exec-transition', 'public-headers')] + [Case('macos-go-link', 'internal-headers', failure='not visible')],
     'msvc': [
@@ -43,14 +49,17 @@ def main():
     failures = []
     for case in GROUPS[args.group]:
         command = [sys.executable, str(ROOT / 'run.py'), case.folder, '--case', case.name, '--variant', case.variant]
+        if case.llvm_version:
+            command += ['--llvm-version', case.llvm_version]
         if sys.platform == 'darwin':
             command.append('--host-sdk')
         if args.group in ('msvc', 'windows'):
             command.append('--accept-msvc-eula')
         result = subprocess.run(command, cwd=ROOT)
-        log = (ROOT / 'results' / case.folder / case.variant / (case.name + '.log')).read_text(errors='replace')
+        variant_dir = case.variant + ('-' + case.llvm_version if case.llvm_version else '')
+        log = (ROOT / 'results' / case.folder / variant_dir / (case.name + '.log')).read_text(errors='replace')
         passed = result.returncode == 0 if case.failure is None else result.returncode != 0 and re.search(case.failure, log, re.IGNORECASE) is not None
-        label = f'{case.folder}/{case.name}/{case.variant}'
+        label = f'{case.folder}/{case.name}/{variant_dir}'
         print(f'{"PASS" if passed else "FAIL"}: {label}', flush=True)
         print('\n'.join(log.splitlines()[-45:]), flush=True)
         if not passed:

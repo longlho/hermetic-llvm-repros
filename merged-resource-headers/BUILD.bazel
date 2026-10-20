@@ -1,0 +1,12 @@
+load(":probe.bzl", "compiler_probe")
+
+compiler_probe(
+    name = "compile_only",
+    src = "probe.c",
+)
+
+compiler_probe(
+    name = "compile_and_link",
+    src = "probe.c",
+    link = True,
+)

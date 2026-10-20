@@ -1,0 +1,6 @@
+exports_files([
+    "Cargo.toml",
+    "Cargo.lock",
+])
+
+exports_files(["rules_rs_android_eabi_cfg.patch"])

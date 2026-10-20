@@ -1,0 +1,18 @@
+module(name = "ios_rpaths_repro")
+
+bazel_dep(name = "apple_support", version = "2.10.1")
+bazel_dep(name = "rules_cc", version = "0.2.26")
+bazel_dep(name = "rules_rs", version = "0.0.111")
+
+rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")
+use_repo(rules_rust, "rules_rust")
+
+toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
+toolchains.toolchain(
+    name = "default_rust_toolchains",
+    edition = "2024",
+    version = "1.96.0",
+)
+use_repo(toolchains, "default_rust_toolchains")
+
+register_toolchains("@default_rust_toolchains//...")
