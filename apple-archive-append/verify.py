@@ -72,13 +72,14 @@ def main():
                 shutil.copy(HERE / item, crate / item)
             shutil.copytree(HERE / "src", crate / "src")
             environment = dict(os.environ, PROBE_TARGET=rust_target, PROBE_SOURCE=str(source_directory),
-                               AR=str(archiver), ARFLAGS="", CC=cc, SDKROOT=sdk, DEVELOPER_DIR=developer,
+                               AR=str(archiver), ARFLAGS="", CC=cc, SDKROOT=sdk, DEVELOPER_DIR=developer, IPHONEOS_DEPLOYMENT_TARGET="15.0",
                                CFLAGS=f"-target {clang_target} -isysroot {sdk}", CARGO_TARGET_DIR=str(crate / "target"))
-            run(["cargo", "build", "--manifest-path", crate / "Cargo.toml"], env=environment)
+            build = subprocess.run(["cargo", "build", "--manifest-path", str(crate / "Cargo.toml")], env=environment, text=True, capture_output=True)
+            assert build.returncode == 0, build.stdout + build.stderr
             archives = list((crate / "target/debug/build").glob("*/out/libprobe.a"))
             assert len(archives) == 1, archives
             native = archives[0]
-            members = output(["xcrun", "ar", "t", native]).splitlines()
+            members = [member for member in output(["xcrun", "ar", "t", native]).splitlines() if not member.startswith("__.SYMDEF")]
             assert len(members) == expected_members, (name, len(members), members)
             symbols = output(["xcrun", "nm", "-g", native])
             assert "_aws_lc_probe_100" in symbols
