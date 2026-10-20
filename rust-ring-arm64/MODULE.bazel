@@ -31,4 +31,11 @@ crate.from_cargo(
 )
 use_repo(crate, "probe_crates")
 
+crate.annotation_select(
+    build_script_env = {"PATH": "/nonexistent"},
+    crate = "ring",
+    repositories = ["probe_crates"],
+    triples = ["aarch64-pc-windows-msvc"],
+)
+
 # CANDIDATE_PATCH

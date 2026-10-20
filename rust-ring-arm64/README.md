@@ -2,7 +2,9 @@
 
 ring 0.17.14 `build.rs:563` replaces the explicitly configured compiler with bare
 `clang` on Windows ARM64 when cc-rs reports that compiler as clang-cl. In a Bazel
-sandbox this fails because `clang` is not on PATH. The candidate recognizes
+sandbox this fails because `clang` is not on PATH. The fixture explicitly
+uses an empty compiler-search PATH for ring so installed host compilers cannot
+change the expected failure; the declared hermetic clang-cl remains available. The candidate recognizes
 clang-cl as an existing Clang compiler and retains the hermetic toolchain.
 
 ```sh
