@@ -1,6 +1,6 @@
 # hermetic-llvm standalone repros
 
-Small public-source experiments against the official **hermetic-llvm 0.8.24** release, using Bazel 9.2.0. Five folders track the remaining investigated patch topics. A policy assertion is not proof of an upstream defect.
+Small public-source experiments against pinned official hermetic-llvm releases, using Bazel 9.2.0. Folders isolate individual compiler and build-rule integration topics. A policy assertion is not proof of an upstream defect.
 
 | Folder | Question |
 | --- | --- |
@@ -9,6 +9,21 @@ Small public-source experiments against the official **hermetic-llvm 0.8.24** re
 | `msvc-integration` | Which CRT, header, library, and VFS assumptions fail independently? |
 | `windows-hardlinks` | Do relative tool symlinks fail on Windows container bind mounts, and do hardlinks fix them? |
 | `windows-bootstrap` | Does native Windows compilation depend on its own SDK overlay generator? |
+
+The Rust fixtures pin **LLVM 0.8.25**, **rules_rs 0.0.111**, and **Rust 1.96.0**:
+
+| Folder | Question |
+| --- | --- |
+| `rust-android-eabi` | Does Cargo dependency resolution recognize Android ARMv7 cfg attributes? |
+| `rust-msvc-linker` | Can Rust cross-link C on MSVC, and do Cargo scripts receive target flags? |
+| `ios-rpaths` | Can Rust cross-link a real iOS C dynamic-library dependency? |
+
+Run `python3 verify-rust-cross.py android --ndk-home /path/to/ndk`,
+`python3 verify-rust-cross.py msvc --accept-msvc-eula`, or
+`python3 verify-rust-cross.py msvc-crt --accept-msvc-eula` on Linux x86-64.
+Run `python3 ios-rpaths/verify.py` on macOS with Xcode. These check precise
+upstream failures and candidate successes; they do not run target programs.
+Rust upstream patch context retains its Apache 2.0 license in `RUST-UPSTREAM-LICENSE`.
 
 ## Run
 

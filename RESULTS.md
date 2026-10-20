@@ -64,3 +64,21 @@ This verifies the mounted-volume failure and hardlink fix on x64 Docker bind mou
 | Windows container mounted archive | Relative tool symlink fails with error 3 | Hardlink patch passes; no symlinks remain and file identity is verified. |
 
 The CRT negative control requires its precise conflicting-feature diagnostic; unrelated build or download failures do not count as reproduction. Windows bootstrap checks compilation; hardlink tests check process launch on a Docker bind mount. Neither establishes Kubernetes PVC or ARM64 runtime behavior.
+
+## Rust cross-toolchain fixtures — LLVM 0.8.25
+
+Linux x86-64 validation uses Bazel 9.2.0, rules_rs 0.0.111, and Rust 1.96.0.
+User/system/workspace Bazel configs are disabled. Only public sources are used.
+
+| Fixture | Upstream | Candidate |
+| --- | --- | --- |
+| Android ARMv7 socket2 dependency | Missing libc for `cfg(unix)` | Compiles after Android EABI cfg normalization |
+| Windows x64 Rust+C executable | clang-cl treats `/LIBPATH` and `/PDBALTPATH` as filenames | Cross-links with the corresponding lld-link |
+| Windows ARM64 Rust+C executable | Same driver-argument failure | Cross-links; PE header is ARM64 |
+| Windows x64 Cargo CRT feature | Build-script target cfg omits `crt-static` | Script observes configured static CRT |
+| Windows ARM64 Cargo CRT feature | Same missing target feature | Script observes configured static CRT |
+| iOS ARM64 simulator Rust+C dynamic-library dependency | macOS verification pending; verifier requires `Runtime linking is not supported on ios` | Local positive unavailable; standalone macOS CI is required |
+
+The five Linux fixture rows each check an expected upstream failure and a
+candidate success. These are ten verified outcomes, not target runtime tests.
+The iOS fixture is not claimed green until its macOS workflow completes.
