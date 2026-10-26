@@ -64,3 +64,53 @@ This verifies the mounted-volume failure and hardlink fix on x64 Docker bind mou
 | Windows container mounted archive | Relative tool symlink fails with error 3 | Hardlink patch passes; no symlinks remain and file identity is verified. |
 
 The CRT negative control requires its precise conflicting-feature diagnostic; unrelated build or download failures do not count as reproduction. Windows bootstrap checks compilation; hardlink tests check process launch on a Docker bind mount. Neither establishes Kubernetes PVC or ARM64 runtime behavior.
+
+## Merged-resource compile/link headers (Linux x86-64)
+
+Bazel 9.2.0, public LLVM releases, sandboxed local execution:
+
+| Case | LLVM 0.8.24 | LLVM 0.8.25 |
+| --- | --- | --- |
+| C compile-only, `stddef.h` | Pass | Not required for the differential |
+| C compile + executable link flags, `stddef.h` | Fails: `fatal error: 'stddef.h' file not found` | Pass |
+
+`python3 verify-release.py resource-headers` verifies these three outcomes.
+A candidate patch exposing individual resource headers also passed on 0.8.24,
+but is unnecessary because upgrading to the public 0.8.25 release fixes the
+same action. No candidate patch is retained. See
+[the standalone repro](merged-resource-headers/README.md) for source references
+and scope.
+
+## Bindgen recursive union template (Linux x86-64)
+
+Synthetic header, host target, libclang 22.1.8:
+
+| Bindgen | Unmodified source | Abstract-template guard |
+| --- | --- | --- |
+| 0.72.1 | Panics: `Not an item: ItemId(...)` | Generates bindings successfully |
+| 0.73.2 | Panics: `Not an item: ItemId(...)` | Generates bindings successfully |
+
+All four expected outcomes pass through
+`python3 bindgen-recursive-union/verify.py`. The ten-line header contains no
+includes. It reproduces the same panic as LLVM23 libc++'s recursive aligned
+union template reached through APM binding generation. See
+[the standalone fixture](bindgen-recursive-union/README.md).
+
+## Rust cross-toolchain fixtures — LLVM 0.8.25
+
+Linux x86-64 validation uses Bazel 9.2.0, rules_rs 0.0.111, and Rust 1.96.0.
+User/system/workspace Bazel configs are disabled. Only public sources are used.
+
+| Fixture | Upstream | Candidate |
+| --- | --- | --- |
+| Android ARMv7 socket2 dependency | Missing libc for `cfg(unix)` | Compiles after Android EABI cfg normalization |
+| Windows x64 Rust+C executable | clang-cl treats `/LIBPATH` and `/PDBALTPATH` as filenames | Cross-links with the corresponding lld-link |
+| Windows ARM64 Rust+C executable | Same driver-argument failure | Cross-links; PE header is ARM64 |
+| Windows ARM64 ring 0.17.14 native build | Overrides hermetic clang-cl with missing bare clang | Retains clang-cl and compiles the complete native library |
+| Windows x64 Cargo CRT feature | Build-script target cfg omits `crt-static` | Script observes configured static CRT |
+| Windows ARM64 Cargo CRT feature | Same missing target feature | Script observes configured static CRT |
+| iOS ARM64 simulator Rust+C dynamic-library dependency | `Runtime linking is not supported on ios` | Real Rust+C cross-link passes on macOS 14 |
+
+The six Linux fixture rows each check an expected upstream failure and a
+candidate success. These are twelve verified outcomes, not target runtime tests.
+The [macOS 14 workflow](https://github.com/longlho/hermetic-llvm-repros/actions/runs/39347793775/job/118384510845) also passes both iOS outcomes.

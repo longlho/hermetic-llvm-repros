@@ -1,7 +1,7 @@
 name: LLVM release regressions
 on:
   push:
-    paths: ['**/MODULE.bazel', '**/*.patch', 'run.py', 'verify-release.py', '.github/workflows/release-regressions.yml']
+    paths: ['**/MODULE.bazel', '**/*.patch', 'merged-resource-headers/**', 'run.py', 'verify-release.py', '.github/workflows/release-regressions.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,6 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - {group: resource-headers, os: ubuntu-24.04}
           - {group: bindgen, os: macos-15}
           - {group: go, os: macos-15}
           - {group: msvc, os: macos-15}

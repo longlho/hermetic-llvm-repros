@@ -1,0 +1,19 @@
+name: Bindgen recursive union regression
+on:
+  push:
+    paths: ['bindgen-recursive-union/**', '.github/workflows/bindgen-recursive-union.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y libclang-18-dev
+      - name: Verify exact upstream failures and candidate outcomes
+        env:
+          LIBCLANG_PATH: /usr/lib/llvm-18/lib
+        run: python3 bindgen-recursive-union/verify.py

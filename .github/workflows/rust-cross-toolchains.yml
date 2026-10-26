@@ -1,0 +1,52 @@
+name: Rust cross-toolchain repros
+on:
+  pull_request:
+    paths: ['rust-android-eabi/**', 'rust-msvc-linker/**', 'rust-ring-arm64/**', 'ios-rpaths/**', 'verify-rust-cross.py', '.github/workflows/rust-cross-toolchains.yml']
+  push:
+    paths: ['rust-android-eabi/**', 'rust-msvc-linker/**', 'rust-ring-arm64/**', 'ios-rpaths/**', 'verify-rust-cross.py', '.github/workflows/rust-cross-toolchains.yml']
+  workflow_dispatch:
+concurrency:
+  group: rust-cross-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  windows-cross:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [msvc, msvc-crt, ring]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3
+        with:
+          bazelisk-cache: true
+          repository-cache: true
+      - run: python3 verify-rust-cross.py ${{ matrix.group }} --accept-msvc-eula
+  android-cross:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3
+        with:
+          bazelisk-cache: true
+          repository-cache: true
+      - name: Install pinned NDK
+        run: |
+          curl -fsSL https://dl.google.com/android/repository/android-ndk-r29-linux.zip -o "$RUNNER_TEMP/ndk.zip"
+          echo "87e2bb7e9be5d6a1c6cdf5ec40dd4e0c6d07c30b  $RUNNER_TEMP/ndk.zip" | sha1sum --check
+          unzip -q "$RUNNER_TEMP/ndk.zip" -d "$RUNNER_TEMP"
+      - run: python3 verify-rust-cross.py android --ndk-home "$RUNNER_TEMP/android-ndk-r29"
+  ios-cross:
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3
+        with:
+          bazelisk-cache: true
+          repository-cache: true
+      - run: python3 ios-rpaths/verify.py
